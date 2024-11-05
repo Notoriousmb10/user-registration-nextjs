@@ -1,3 +1,5 @@
+
+
 import * as React from "react";
 import { useEffect, useState } from "react";
 
@@ -11,11 +13,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {EditCard} from "./EditCard"
+import { EditCard } from "./EditCard";
 
 export function UserDisplay() {
-  const [user, setUser] = useState([]);
+  const [users, setUsers] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [userToPass, setUserToPass] = useState({});
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -33,8 +36,7 @@ export function UserDisplay() {
 
         const text = await res.text();
         const data = text ? JSON.parse(text) : [];
-        setUser(data);
-        console.log(data);
+        setUsers(data);
       } catch (error) {
         console.log(error);
       }
@@ -43,28 +45,19 @@ export function UserDisplay() {
     fetchUsers();
   }, []);
 
-  const closeDrawer = () => {
-    setIsDrawerOpen(false)
-  }
+  const openDrawer = (user) => {
+    setIsDrawerOpen(true);
+    setUserToPass(user);
+  };
 
-  const updateUser = async (id) => {
-    try{
-      const res = await fetch(`/api/update-user`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "PUT",
-        body: JSON.stringify({ id: id, name: "John Doe" }),
-      })
-    }catch(error){
-      console.log(error)
-    }
-  }
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+  };
 
   return (
     <div className="grid grid-cols-3 gap-10">
-      {user.map((user) => (
-        <Card id={user.id} className="w-[350px] shadow-lg">
+      {users.map((user) => (
+        <Card key={user.id} className="w-[350px] shadow-lg">
           <CardHeader>
             <CardTitle>User Details</CardTitle>
           </CardHeader>
@@ -82,11 +75,15 @@ export function UserDisplay() {
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="role">Role</Label>
-                  <Input id="role" placeholder="Role"
-                     value={user.role} readOnly />
+                  <Input
+                    id="role"
+                    placeholder="Role"
+                    value={user.role}
+                    readOnly
+                  />
                 </div>
                 <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="email">Email</Label>  
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     placeholder="Email"
@@ -97,13 +94,12 @@ export function UserDisplay() {
               </div>
             </form>
           </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button variant="outline" onClick={openDrawer}>Edit</Button>
-            <Button>Delete</Button>
+          <CardFooter>
+            <Button onClick={() => openDrawer(user)}>View Details</Button>
           </CardFooter>
         </Card>
       ))}
-      <EditCard isOpen={isDrawerOpen} onClose={closeDrawer}/>
+      <EditCard isOpen={isDrawerOpen} onClose={closeDrawer} user={userToPass} />
     </div>
   );
 }

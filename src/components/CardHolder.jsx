@@ -43,6 +43,7 @@ export function CardHolder() {
 
       const data = await res.json();
       console.log(data);
+      window.location.reload();
     } catch (err) {
       console.log(err);
     }
